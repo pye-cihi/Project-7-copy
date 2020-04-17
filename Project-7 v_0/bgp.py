@@ -25,7 +25,7 @@ parser.add_argument('--sleep', default=3, type=int)
 args = parser.parse_args()
 
 FLAGS_rogue_as = args.rogue
-ROGUE_AS_NAME = 'R4'
+ROGUE_AS_NAME = 'R6'
 
 def log(s, col="green"):
     print T.colored(s, col)
@@ -91,21 +91,21 @@ class SimpleTopo(Topo):
         self.addLink('R2', 'R3')
 
         # ROGUE SECTION!
-        routers.append(self.addSwitch('R4'))
+        routers.append(self.addSwitch('R6'))
         for j in xrange(num_hosts_per_as):
-            hostname = 'h%d-%d' % (4, j+1)
+            hostname = 'h%d-%d' % (6, j+1)
             host = self.addNode(hostname)
             hosts.append(host)
-            self.addLink('R4', hostname)
+            self.addLink('R6', hostname)
         # This MUST be added at the end
-        self.addLink('R3', 'R4')
+        self.addLink('R3', 'R6')
         return
 
 
 def getIP(hostname):
     AS, idx = hostname.replace('h', '').split('-')
     AS = int(AS)
-    if AS == 4:
+    if AS == 6:
         AS = 1
     ip = '%s.0.%s.1/24' % (10+AS, idx)
     return ip
@@ -116,7 +116,7 @@ def getGateway(hostname):
     AS = int(AS)
     # This condition gives AS4 the same IP range as AS3 so it can be an
     # attacker.
-    if AS == 4:
+    if AS == 6:
         AS = 1
     gw = '%s.0.%s.254' % (10+AS, idx)
     return gw
@@ -158,7 +158,7 @@ def main():
 
     log("Starting web servers", 'yellow')
     startWebserver(net, 'h1-1', "Default web server")
-    startWebserver(net, 'h4-1', "*** Attacker web server ***")
+    startWebserver(net, 'h6-1', "*** Attacker web server ***")
 
     CLI(net)
     net.stop()
