@@ -1,6 +1,6 @@
 #!/bin/bash
 
-node=${1:-h3-1}
+node=${1:-h5-1}
 bold=`tput bold`
 normal=`tput sgr0`
 
