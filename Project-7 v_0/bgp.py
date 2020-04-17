@@ -69,11 +69,13 @@ class SimpleTopo(Topo):
         num_ases = 3
         num_hosts = num_hosts_per_as * num_ases
         # The topology has one router per AS
-	routers = []
+	    routers = []
+        # add switch R1, R2, R3, R4, R5
         for i in xrange(num_ases):
             router = self.addSwitch('R%d' % (i+1))
 	    routers.append(router)
         hosts = []
+        # add host and the intra-AS link from swicht to host (R1, h1-1), (R1, h1-2)
         for i in xrange(num_ases):
             router = 'R%d' % (i+1)
             for j in xrange(num_hosts_per_as):
@@ -82,9 +84,13 @@ class SimpleTopo(Topo):
                 hosts.append(host)
                 self.addLink(router, host)
 
-        for i in xrange(num_ases-1):
-            self.addLink('R%d' % (i+1), 'R%d' % (i+2))
+        # add the inter-AS link
+        # for i in xrange(num_ases-1):
+        #     self.addLink('R%d' % (i+1), 'R%d' % (i+2))
+        self.addLink('R1', 'R2')
+        self.addLink('R2', 'R3')
 
+        # ROGUE SECTION!
         routers.append(self.addSwitch('R4'))
         for j in xrange(num_hosts_per_as):
             hostname = 'h%d-%d' % (4, j+1)
@@ -92,7 +98,7 @@ class SimpleTopo(Topo):
             hosts.append(host)
             self.addLink('R4', hostname)
         # This MUST be added at the end
-        self.addLink('R1', 'R4')
+        self.addLink('R3', 'R4')
         return
 
 
@@ -100,7 +106,7 @@ def getIP(hostname):
     AS, idx = hostname.replace('h', '').split('-')
     AS = int(AS)
     if AS == 4:
-        AS = 3
+        AS = 1
     ip = '%s.0.%s.1/24' % (10+AS, idx)
     return ip
 
@@ -111,7 +117,7 @@ def getGateway(hostname):
     # This condition gives AS4 the same IP range as AS3 so it can be an
     # attacker.
     if AS == 4:
-        AS = 3
+        AS = 1
     gw = '%s.0.%s.254' % (10+AS, idx)
     return gw
 
@@ -151,7 +157,7 @@ def main():
         host.cmd("route add default gw %s" % (getGateway(host.name)))
 
     log("Starting web servers", 'yellow')
-    startWebserver(net, 'h3-1', "Default web server")
+    startWebserver(net, 'h1-1', "Default web server")
     startWebserver(net, 'h4-1', "*** Attacker web server ***")
 
     CLI(net)
